@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -62,15 +61,12 @@ public class ManagerService {
 
         List<Manager> managerList = managerRepository.findByTodoIdWithUser(todo.getId());
 
-        List<ManagerResponse> dtoList = new ArrayList<>();
-        for (Manager manager : managerList) {
-            User user = manager.getUser();
-            dtoList.add(new ManagerResponse(
-                    manager.getId(),
-                    new UserResponse(user.getId(), user.getEmail())
-            ));
-        }
-        return dtoList;
+        return managerList.stream()
+                .map(manager -> new ManagerResponse(
+                        manager.getId(),
+                        new UserResponse(manager.getUser().getId(), manager.getUser().getEmail())
+                ))
+                .toList();
     }
 
     @Transactional
