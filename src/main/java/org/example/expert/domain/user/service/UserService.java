@@ -28,12 +28,14 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new InvalidRequestException("User not found"));
 
-        if (passwordEncoder.matches(userChangePasswordRequest.getNewPassword(), user.getPassword())) {
-            throw new InvalidRequestException("새 비밀번호는 기존 비밀번호와 같을 수 없습니다.");
-        }
-
+        // 1. 먼저 구 비밀번호가 맞는지 확인
         if (!passwordEncoder.matches(userChangePasswordRequest.getOldPassword(), user.getPassword())) {
             throw new InvalidRequestException("잘못된 비밀번호입니다.");
+        }
+
+        // 2. 새 비밀번호와 구 비밀번호가 같은지 평문으로 비교
+        if (userChangePasswordRequest.getNewPassword().equals(userChangePasswordRequest.getOldPassword())) {
+            throw new InvalidRequestException("새 비밀번호는 기존 비밀번호와 같을 수 없습니다.");
         }
 
         user.changePassword(passwordEncoder.encode(userChangePasswordRequest.getNewPassword()));
